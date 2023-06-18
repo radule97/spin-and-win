@@ -23,9 +23,9 @@ export default function App() {
             <NavigationMenu
               navigationLinks={[
                 {
-                  label: t("NavigationMenu.pageName"),
-                  destination: "/pagename",
-                },
+                  label: t("NavigationMenu.createReward"),
+                  destination: "/create",
+                }
               ]}
             />
             <Routes pages={pages} />
