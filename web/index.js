@@ -5,7 +5,8 @@ import express from "express";
 import serveStatic from "serve-static";
 
 import shopify from "./shopify.js";
-import productCreator from "./product-creator.js";
+import productCreator from "./backend/product-creator.js";
+import rewardCreator from "./backend/reward-creator.js";
 import GDPRWebhookHandlers from "./gdpr.js";
 
 const PORT = parseInt(
@@ -38,6 +39,20 @@ app.post(
 app.use("/api/*", shopify.validateAuthenticatedSession());
 
 app.use(express.json());
+
+app.get("/api/reward/create", async (_req, res) => {
+  let status = 200;
+  let error = null;
+
+  try {
+    await rewardCreator(res.locals.shopify.session, _req.body);
+  } catch (e) {
+    console.log(`Failed to process products/create: ${e.message}`);
+    status = 500;
+    error = e.message;
+  }
+  res.status(status).send({ success: status === 200, error });
+});
 
 app.get("/api/products/count", async (_req, res) => {
   const countData = await shopify.api.rest.Product.count({

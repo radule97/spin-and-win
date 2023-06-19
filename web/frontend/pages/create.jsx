@@ -1,34 +1,46 @@
-import { Card, Page, Layout, TextContainer, Text, Form, TextField, DatePicker, Select } from "@shopify/polaris";
-import { TitleBar } from "@shopify/app-bridge-react";
+import { Card, Page, Layout, TextContainer, Text } from "@shopify/polaris";
+import { TitleBar, useNavigate } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
-import React, { useState } from 'react';
+import { useAppQuery, useAuthenticatedFetch } from "../hooks";
 
-export default function CreateReward() {
+export default function PageName() {
   const { t } = useTranslation();
-  const [type, setType] = useState('');
-  const [resourceId, setResourceId] = useState('');
-  const [resourceName, setResourceName] = useState('');
-  const [percentageOfLuck, setPercentageOfLuck] = useState('');
-  const [requiredSpend, setRequiredSpend] = useState('');
+  const navigate = useNavigate();
+  const fetch = useAuthenticatedFetch();
 
-  const handleTypeChange = (value) => setType(value);
-  const handleResourceIdChange = (value) => setResourceId(value);
-  const handleResourceNameChange = (value) => setResourceName(value);
-  const handlePercentageOfLuckChange = (value) => setPercentageOfLuck(value);
-  const handleRequiredSpendChange = (value) => setRequiredSpend(value);
-
+  const saveAction = async () => {
+    const body_data = {
+      percentage: 0.1,
+      discount_code: 'TEST123'
+    };
+    console.log(body_data);
+    const response = await fetch("/api/reward/create", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body_data)
+    });
+    if (response.ok) {
+      const res_json = await response.json();
+      console.log(res_json)
+      navigate('/');
+    } else {
+      console.log('response not ok!');
+    }
+  }
 
   return (
-    <Page fullWidth>
+    <Page>
       <TitleBar
-        title={t("CreateReward.title")}
+        title={t("PageName.title")}
         primaryAction={{
-          content: t("CreateReward.primaryAction"),
-          onAction: () => console.log("Primary action"),
+          content: t("PageName.primaryAction"),
+          onAction: () => saveAction(),
         }}
         secondaryActions={[
           {
-            content: t("CreateReward.secondaryAction"),
+            content: t("PageName.secondaryAction"),
             onAction: () => console.log("Secondary action"),
           },
         ]}
@@ -36,13 +48,30 @@ export default function CreateReward() {
       <Layout>
         <Layout.Section>
           <Card sectioned>
-            <Form>
-              <Select label="Type" options={['Discount', 'Free Gift', 'Gift Card']} onChange={handleTypeChange} value={type} />
-              <TextField label="Resource ID" value={resourceId} onChange={handleResourceIdChange} />
-              <TextField label="Resource Name" value={resourceName} onChange={handleResourceNameChange} />
-              <TextField type="number" label="Percentage of Luck" value={percentageOfLuck} onChange={handlePercentageOfLuckChange} />
-              <TextField type="number" label="Required Spend in $" value={requiredSpend} onChange={handleRequiredSpendChange} />
-            </Form>
+            <Text variant="headingMd" as="h2">
+              {t("PageName.heading")}
+            </Text>
+            <TextContainer>
+              <p>{t("PageName.body")}</p>
+            </TextContainer>
+          </Card>
+          <Card sectioned>
+            <Text variant="headingMd" as="h2">
+              {t("PageName.heading")}
+            </Text>
+            <TextContainer>
+              <p>{t("PageName.body")}</p>
+            </TextContainer>
+          </Card>
+        </Layout.Section>
+        <Layout.Section secondary>
+          <Card sectioned>
+            <Text variant="headingMd" as="h2">
+              {t("PageName.heading")}
+            </Text>
+            <TextContainer>
+              <p>{t("PageName.body")}</p>
+            </TextContainer>
           </Card>
         </Layout.Section>
       </Layout>
