@@ -40,18 +40,20 @@ app.use("/api/*", shopify.validateAuthenticatedSession());
 
 app.use(express.json());
 
-app.get("/api/reward/create", async (_req, res) => {
+app.post("/api/reward/create", async (_req, res) => {
   let status = 200;
   let error = null;
+  let data = {};
 
   try {
-    await rewardCreator(res.locals.shopify.session, _req.body);
+    data = await rewardCreator(res.locals.shopify.session, _req.body);
+    //console.log(data)
   } catch (e) {
     console.log(`Failed to process products/create: ${e.message}`);
     status = 500;
     error = e.message;
   }
-  res.status(status).send({ success: status === 200, error });
+  res.status(status).send({ success: status === 200, error, req_data: _req.body, data });
 });
 
 app.get("/api/products/count", async (_req, res) => {

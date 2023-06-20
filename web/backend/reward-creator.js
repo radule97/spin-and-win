@@ -1,7 +1,20 @@
 import { GraphqlQueryError } from "@shopify/shopify-api";
 import shopify from "../shopify.js";
 
-const CREATE_BASIC_DISCOUNT_CODE_MUTATION = `
+/*################
+mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) {
+  discountCodeBasicCreate(basicCodeDiscount: $basicCodeDiscount) {
+    codeDiscountNode {
+      # DiscountCodeNode fields
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+
+Confirmed
 mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) {
   discountCodeBasicCreate(basicCodeDiscount: $basicCodeDiscount) {
     codeDiscountNode {
@@ -13,61 +26,82 @@ mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) {
     }
   }
 }
-`;
 
-export const DEFAULT_PRODUCTS_COUNT = 5;
-const CREATE_PRODUCTS_MUTATION = `
-  mutation populateProduct($input: ProductInput!) {
-    productCreate(input: $input) {
-      product {
-        id
+#################*/
+const CREATE_BASIC_DISCOUNT_CODE_MUTATION = `
+mutation discountCodeAppCreate($codeAppDiscount: DiscountCodeAppInput!) {
+  discountCodeAppCreate(codeAppDiscount: $codeAppDiscount) {
+    codeAppDiscount {
+      discountId
+      title
+      appDiscountType {
+        description
+        functionId
       }
+      combinesWith {
+        orderDiscounts
+        productDiscounts
+        shippingDiscounts
+      }
+      codes(first: 100) {
+        nodes {
+          code
+        }
+      }
+      status
+      usageLimit
+    }
+    userErrors {
+      field
+      message
     }
   }
+}
 `;
 
 export default async function rewardCreator(session, body = {}) {
   const client = new shopify.api.clients.Graphql({ session });
 
   try {
-    /*
-    items: {
-                products: {
-                  productsToAdd: body.products
-                }
-              },
-    * */
-    const createdDiscountResponse = await client.query({
+    const response = await client.query({
       data: {
         query: CREATE_BASIC_DISCOUNT_CODE_MUTATION,
         variables: {
-          basicCodeDiscount: {
-            appliesOncePerCustomer: true,
-            code: `${body.discount_code}`,
-            customerGets: {
-              value: {
-                percentage: body.percentage
+          "codeAppDiscount": {
+            "code": "APP_DISCOUNT_2",
+            "title": "Take 5$ from order discount",
+            "functionId": "01G6M10DHVKQGAR0VZMD4D3V78",
+            "appliesOncePerCustomer": true,
+            "combinesWith": {
+              "orderDiscounts": true,
+              "productDiscounts": true,
+              "shippingDiscounts": true
+            },
+            "startsAt": "2021-02-02T17:09:21Z",
+            "endsAt": "2024-02-02T17:09:21Z",
+            "usageLimit": 1,
+            "metafields": [
+              {
+                "namespace": "default",
+                "key": "function-configuration",
+                "type": "json",
+                "value": "{\"discounts\":[{\"value\":{\"fixedAmount\":{\"amount\":5}},\"targets\":[{\"orderSubtotal\":{\"excludedVariantIds\":[]}}]}],\"discountApplicationStrategy\":\"FIRST\"}"
               }
-            },
-            customerSelection: {
-              all: true,
-            },
-            startsAt: "2022-04-18T02:38:45Z",
-            title: `${body.discount_code}`
-          },
+            ]
+          }
         },
       },
     });
+    console.log(JSON.stringify(response, null, 2));
+    return response;
 
-    if(createdDiscountResponse.body.data.discountCodeBasicCreate.codeDiscountNode && createdDiscountResponse.body.data.discountCodeBasicCreate.codeDiscountNode.id){
-      body.discountCodeId = createdDiscountResponse.body.data.discountCodeBasicCreate.codeDiscountNode.id;
-      const discountCodeData = await getDiscount(session, body);
-      if(discountCodeData.body.data.codeDiscountNode.id){
-        body.metafield_value = discountCodeData.body.data.codeDiscountNode;
-        return await createMetaFieldsDiscounts(session, body);
-      }
-    }
   } catch (error) {
-    throw new Error(`${error.message}\n${JSON.stringify(error.response, null, 2)}`);
+    if (error instanceof GraphqlQueryError) {
+      throw new Error(
+        `${error.message}\n${JSON.stringify(error.response, null, 2)}`
+      );
+    } else {
+      throw error;
+    }
   }
 }

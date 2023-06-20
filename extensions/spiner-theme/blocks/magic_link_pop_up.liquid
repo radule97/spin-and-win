@@ -1,0 +1,35 @@
+<script>
+  window.cart_wizard = {
+      design_mode: {{ request.design_mode }}
+  }
+</script>
+<style>
+  #shopify-block-{{ block.id }} {
+   
+  }
+</style>
+
+<div id="cart_wizard" class="closed-popup">
+  <div class="cw_trigger_btn">
+    {% render 'badge', id: 'cw_badge' %}
+    <span class="cw_trigger_btn_text">SALE</span>
+  </div>
+</div>
+
+
+{% schema %}
+{
+  "name": "Spin and Win",
+  "target": "body",
+  "javascript": "spin.js",
+  "stylesheet": "spin.css",
+  "settings": [
+    {
+      "label": "Show preview of the Cart Wizard",
+      "id": "cart_wizard_preview",
+      "type": "checkbox",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

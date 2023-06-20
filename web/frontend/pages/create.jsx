@@ -10,8 +10,9 @@ export default function PageName() {
 
   const saveAction = async () => {
     const body_data = {
+      products: ['gid://shopify/Product/7453724278973'],
       percentage: 0.1,
-      discount_code: 'TEST123'
+      discount_code: 'TEST12344'
     };
     console.log(body_data);
     const response = await fetch("/api/reward/create", {
@@ -24,7 +25,7 @@ export default function PageName() {
     if (response.ok) {
       const res_json = await response.json();
       console.log(res_json)
-      navigate('/');
+      //navigate('/');
     } else {
       console.log('response not ok!');
     }
